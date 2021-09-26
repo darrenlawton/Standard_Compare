@@ -1,6 +1,7 @@
-import PyPDF2
+# https://medium.com/@_chriz_/development-of-a-structure-aware-pdf-parser-7285f3fe41a9
+# 'artefacts/APS_113_January_2013.pdf'
 
-pdfFileObj = open('artefacts/APS_113_January_2013.pdf', 'rb')
-pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
+from pdfminer import high_level
 
+print(high_level.extract_text('artefacts/APS_113_January_2013.pdf'))
 
