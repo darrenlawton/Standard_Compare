@@ -8,7 +8,7 @@ class StructuredDocument:
 class Section:
   content:  TextElement
   children: List[Section]
-  level:    int
+  level:    int0
 class TextElement:
   text:     LTTextContainer # the extracted paragraph from pdfminer
   style:    Style
@@ -18,14 +18,17 @@ class TextElement:
 
 from pdfstructure.hierarchy.parser import HierarchyParser
 from pdfstructure.source import FileSource
+from pdfstructure.printer import PrettyStringPrinter
 
 parser = HierarchyParser()
 
-# specify source (that implements source.read())
-path = 'artefacts/APS_113_January_2013.pdf'
+# specify source (that implements source.read())s
+path = 'artefacts/tableofcontents.pdf'
 source = FileSource(path)
 
 # analyse document and parse as nested data structure
 document = parser.parse_pdf(source)
 
-print(document)
+pretty_string_printer = PrettyStringPrinter()
+pretty_string = pretty_string_printer.print(document)
+print(pretty_string)
