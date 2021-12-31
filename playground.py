@@ -23,7 +23,7 @@ from pdfstructure.printer import PrettyStringPrinter
 parser = HierarchyParser()
 
 # specify source (that implements source.read())s
-path = 'artefacts/tableofcontents.pdf'
+path = 'artefacts/reduced_APS_113_January_2013.pdf'
 source = FileSource(path)
 
 # analyse document and parse as nested data structure
