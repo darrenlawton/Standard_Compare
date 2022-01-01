@@ -1,25 +1,35 @@
-from pdfminer.pdfparser import PDFParser
-from pdfminer.pdfdocument import PDFDocument
-from pdfminer.pdfinterp import resolve1
-from pdfminer.high_level import extract_pages
-from pdfminer.layout import LAParams, LTTextContainer
 import re
 from difflib import SequenceMatcher
 
+from pdfminer.high_level import extract_pages
+from pdfminer.layout import LAParams, LTTextContainer
+from pdfminer.pdfdocument import PDFDocument
+from pdfminer.pdfinterp import resolve1
+from pdfminer.pdfparser import PDFParser
+
+# global parameters
+similarity_threshold = 0.8
+n_neighbours = 8
+
 
 def calc_similarity(target_text, page_data):
-    score = 0
+    score = []
     for text in page_data:
-        score += SequenceMatcher(None, target_text, text).ratio()
-    return score
+        score.append(SequenceMatcher(None, target_text, text).ratio())
+    return sum(score) / (len(score) or 1)
 
 
-def assess_candidates(candidates, page_number, page_layouts):
+def assess_candidates(candidates, page_number, page_layouts, header_flag):
     """
     Takes in a list of y coordinates (candidates), the target page number and surrounding page data
     Returns y coordinate that captures the header or footer
     """
     scores = []
+
+    # if header, then reverse order of candidates because if equal score we'd want the lowest boundary
+    if header_flag:
+        candidates.reverse()
+
     for candidate in candidates:
         page_data = []
         target_text = None
@@ -29,18 +39,22 @@ def assess_candidates(candidates, page_number, page_layouts):
                 if element.y0 == candidate:
                     if page == page_number:
                         target_text = re.sub(r'\d', '@', element.get_text())
-                    else: page_data.append(re.sub(r'\d', '@', element.get_text()))
+                    else:
+                        page_data.append(re.sub(r'\d', '@', element.get_text()))
         scores.append(calc_similarity(target_text, page_data))
-    return candidates[scores.index(max(scores))]
+
+    # Assess against threshold to determine if actually a header or footer
+    if max(scores) < similarity_threshold:
+        return 0
+    else:
+        return candidates[scores.index(max(scores))]
 
 
-def get_header_footer(pdf_file, page_number, line_margin=0.03):
+def get_margins(pdf_file, page_number, line_margin=0.025):
     """
     Takes in a pdf file path and page number, and returns the y boundaries of any header and footer as a dict
     Implementing https://www.hpl.hp.com/techreports/2002/HPL-2002-129.pdf
     """
-    n_neighbours = 8
-
     # Determine numbers of pages in document to set min and max pages
     pdf = open(pdf_file, 'rb')
     parser = PDFParser(pdf)
@@ -54,7 +68,7 @@ def get_header_footer(pdf_file, page_number, line_margin=0.03):
     dict_page_layout = dict()
     for page in range(min_page, max_page):
         elements = []
-        for page_layout in extract_pages(pdf_file='artefacts/reduced_APS_113_January_2013.pdf',
+        for page_layout in extract_pages(pdf_file=pdf_file,
                                          laparams=LAParams(line_margin=line_margin),
                                          page_numbers=[page]):
             for element in page_layout:
@@ -69,11 +83,9 @@ def get_header_footer(pdf_file, page_number, line_margin=0.03):
     footer_candidates = y0_set[len(y0_set) - 2:len(y0_set)]
 
     # Determine header boundary
-    header_boundary: float = assess_candidates(header_candidates, page_number, dict_page_layout)
+    header_boundary: float = assess_candidates(header_candidates, page_number, dict_page_layout, True)
     # Determine footer boundary
-    footer_boundary: float = assess_candidates(footer_candidates, page_number, dict_page_layout)
+    footer_boundary: float = assess_candidates(footer_candidates, page_number, dict_page_layout, False)
 
-    return {"Header": header_boundary, "Footer": footer_boundary}
-
-
+    return {"header": header_boundary, "footer": footer_boundary}
 
