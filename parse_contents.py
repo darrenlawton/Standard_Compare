@@ -36,6 +36,6 @@ def parse_contents(pdf_file, content_pages: list):
     #     print([unicodedata.normalize("NFKD", x) for x in check])
 
 
-#parse_contents(pdf_file='artefacts/reduced_APS_113_January_2013.pdf', content_pages=[1])
-parse_contents(pdf_file='artefacts/rbnz_tableofcontents.pdf', content_pages=[0,1])
+parse_contents(pdf_file='artefacts/reduced_APS_113_January_2013.pdf', content_pages=[1])
+#parse_contents(pdf_file='artefacts/rbnz_tableofcontents.pdf', content_pages=[0,1])
 # parse_contents(pdf_file='artefacts/boe_test_doc.pdf',  content_pages=[2])

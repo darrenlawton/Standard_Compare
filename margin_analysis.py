@@ -15,7 +15,7 @@ n_neighbours = 8
 def calc_similarity(target_text, page_data):
     score = []
     for text in page_data:
-        score.append(SequenceMatcher(None, target_text, text).ratio())
+        score.append(SequenceMatcher(None, target_text.strip(), text.strip()).ratio())
     return sum(score) / (len(score) or 1)
 
 
@@ -35,8 +35,8 @@ def assess_candidates(candidates, page_number, page_layouts, header_flag):
         target_text = None
         for page, elements in page_layouts.items():
             for element in elements:
-                # By matching on y coordinate, implicitly ensures geometric similarity
-                if element.y0 == candidate:
+                # By matching on starting coordinate, implicitly ensures geometric similarity
+                if element.y0 == candidate[0] and element.x0 == candidate[1]:
                     if page == page_number:
                         target_text = re.sub(r'\d', '@', element.get_text())
                     else:
@@ -79,15 +79,15 @@ def get_margins(pdf_file, page_number, line_margin=0.025):
         if elements is not None: dict_page_layout[page] = elements
 
     # Get header and footer candidates from input page
-    y0_set = list(map(lambda elem: elem.y0, dict_page_layout[page_number]))
-    y0_set.sort(reverse=True)
-    header_candidates = y0_set[0:2]
-    footer_candidates = y0_set[len(y0_set) - 2:len(y0_set)]
+    coord_list = sorted(list(map(lambda elem: [elem.y0, elem.x0], dict_page_layout[page_number])),
+                        key=lambda y: y[0], reverse=True)
+
+    header_candidates = coord_list[0:3]
+    footer_candidates = coord_list[len(coord_list) - 3:len(coord_list)]
 
     # Determine header boundary
-    header_boundary: float = assess_candidates(header_candidates, page_number, dict_page_layout, True)
+    header_boundary: float = assess_candidates(header_candidates, page_number, dict_page_layout, True)[0]
     # Determine footer boundary
-    footer_boundary: float = assess_candidates(footer_candidates, page_number, dict_page_layout, False)
+    footer_boundary: float = assess_candidates(footer_candidates, page_number, dict_page_layout, False)[0]
 
     return {"header": header_boundary, "footer": footer_boundary}
-
