@@ -44,8 +44,10 @@ def assess_candidates(candidates, page_number, page_layouts, header_flag):
         scores.append(calc_similarity(target_text, page_data))
 
     # Assess against threshold to determine if actually a header or footer
-    if max(scores) < similarity_threshold:
-        return 0
+    if max(scores) < similarity_threshold and header_flag:
+        return max(candidates)
+    elif max(scores) < similarity_threshold and header_flag:
+        return min(candidates)
     else:
         return candidates[scores.index(max(scores))]
 
