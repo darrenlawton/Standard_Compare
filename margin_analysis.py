@@ -21,8 +21,8 @@ def calc_similarity(target_text, page_data):
 
 def assess_candidates(candidates, page_number, page_layouts, header_flag):
     """
-    Takes in a list of y coordinates (candidates), the target page number and surrounding page data
-    Returns y coordinate that captures the header or footer
+    Takes in a list of y and x coordinates (candidates), the target page number and surrounding page data
+    Returns coordinates that captures the header or footer
     """
     scores = []
 
