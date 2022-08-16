@@ -50,6 +50,6 @@ def parse_contents_page(pdf_file, content_pages: list):
     
     return contents
 
-#parse_contents_page(pdf_file='artefacts/reduced_APS_113_January_2013.pdf', content_pages=[1])
-parse_contents_page(pdf_file='artefacts/rbnz_tableofcontents.pdf', content_pages=[0,1])
+#print(parse_contents_page(pdf_file='artefacts/reduced_APS_113_January_2013.pdf', content_pages=[1]))
+#print(parse_contents_page(pdf_file='artefacts/rbnz_tableofcontents.pdf', content_pages=[0,1]))
 #parse_contents_page(pdf_file='artefacts/boe_test_doc.pdf',  content_pages=[2])
